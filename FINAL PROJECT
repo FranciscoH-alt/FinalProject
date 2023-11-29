@@ -22,14 +22,14 @@ public class HangmanFX extends Application {
         primaryStage.setTitle("Hangman Game");
 
         // Title page
-        BorderPane titlePane = createTitlePage();
+        BorderPane titlePane = createTitlePage(primaryStage);
         Scene titleScene = new Scene(titlePane, 400, 300);
 
         // Set up the game
         hangmanGame = new HangmanGameFX();
 
         // Main game scene
-        BorderPane gamePane = createGamePane();
+        BorderPane gamePane = createGamePane(primaryStage);
         Scene gameScene = new Scene(gamePane, 400, 300);
 
         // Switch to the game scene when the start button is clicked
@@ -45,7 +45,8 @@ public class HangmanFX extends Application {
         primaryStage.show();
     }
 
-    private BorderPane createTitlePage() {
+    // Create the title page
+    private BorderPane createTitlePage(Stage primaryStage) {
         BorderPane titlePane = new BorderPane();
         titlePane.setStyle("-fx-background-color: #4CAF50;");
 
@@ -63,7 +64,8 @@ public class HangmanFX extends Application {
         return titlePane;
     }
 
-    private BorderPane createGamePane() {
+    // Create the main game pane
+    private BorderPane createGamePane(Stage primaryStage) {
         BorderPane gamePane = new BorderPane();
         gamePane.setStyle("-fx-background-color: #90EE90;");
 
@@ -92,7 +94,7 @@ public class HangmanFX extends Application {
         startOverButton.setOnAction(e -> {
             hangmanGame.reset();
             updateGameUI();
-            primaryStage.setScene(createTitleScene());
+            primaryStage.setScene(createTitleScene(primaryStage));
         });
         startOverButton.setVisible(false);
 
@@ -103,11 +105,13 @@ public class HangmanFX extends Application {
         return gamePane;
     }
 
-    private Scene createTitleScene() {
-        BorderPane titlePane = createTitlePage();
+    // Create the title scene
+    private Scene createTitleScene(Stage primaryStage) {
+        BorderPane titlePane = createTitlePage(primaryStage);
         return new Scene(titlePane, 400, 300);
     }
 
+    // Handle making a guess
     private void makeGuess(String guess) {
         if (guess.length() == 1) {
             char letterGuess = guess.toLowerCase().charAt(0);
@@ -123,6 +127,7 @@ public class HangmanFX extends Application {
         }
     }
 
+    // Update the game UI
     private void updateGameUI() {
         wordLabel.setText(hangmanGame.getGuessedWord());
         attemptsLabel.setText("Attempts left: " + hangmanGame.getAttemptsLeft());
@@ -132,6 +137,7 @@ public class HangmanFX extends Application {
         }
     }
 
+    // Show the game over popup
     private void showGameOverPopup() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Game Over");
@@ -147,6 +153,7 @@ public class HangmanFX extends Application {
     }
 }
 
+// Hangman game logic
 class HangmanGameFX {
     private String[] words = {"java", "hangman", "programming", "computer", "algorithm"};
     private String secretWord;
@@ -154,10 +161,12 @@ class HangmanGameFX {
     private int maxAttempts;
     private int attemptsLeft;
 
+    // Constructor
     public HangmanGameFX() {
         reset();
     }
 
+    // Reset the game
     public void reset() {
         this.secretWord = selectRandomWord();
         this.maxAttempts = secretWord.length() + 2;
@@ -165,26 +174,32 @@ class HangmanGameFX {
         this.guessedWord = new StringBuilder("_".repeat(secretWord.length()));
     }
 
+    // Check if the game is over
     public boolean isGameOver() {
         return attemptsLeft <= 0 || guessedWord.toString().equals(secretWord);
     }
 
+    // Check if the game is won
     public boolean isGameWon() {
         return guessedWord.toString().equals(secretWord);
     }
 
+    // Get the guessed word
     public String getGuessedWord() {
         return guessedWord.toString();
     }
 
+    // Get the attempts left
     public int getAttemptsLeft() {
         return attemptsLeft;
     }
 
+    // Get the secret word
     public String getSecretWord() {
         return secretWord;
     }
 
+    // Make a letter guess
     public void makeGuess(char guess) {
         if (!Character.isLetter(guess)) {
             return;
@@ -199,6 +214,7 @@ class HangmanGameFX {
         }
     }
 
+    // Make a word guess
     public void makeWordGuess(String wordGuess) {
         if (wordGuess.equals(secretWord)) {
             guessedWord = new StringBuilder(secretWord);
@@ -207,15 +223,5 @@ class HangmanGameFX {
         }
     }
 
-    private String selectRandomWord() {
-        return words[(int) (Math.random() * words.length)];
-    }
-
-    private void updateGuessedWord(char guess) {
-        for (int i = 0; i < secretWord.length(); i++) {
-            if (secretWord.charAt(i) == guess) {
-                guessedWord.setCharAt(i, guess);
-            }
-        }
-    }
-}
+    // Select a random word
+    private String select
