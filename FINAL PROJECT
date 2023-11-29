@@ -11,6 +11,7 @@ public class HangmanFX extends Application {
     private HangmanGameFX hangmanGame;
     private Label wordLabel;
     private Label attemptsLabel;
+    private Button startOverButton;
 
     public static void main(String[] args) {
         launch(args);
@@ -46,10 +47,11 @@ public class HangmanFX extends Application {
 
     private BorderPane createTitlePage() {
         BorderPane titlePane = new BorderPane();
-        titlePane.setStyle("-fx-background-color: #c0c0c0;");
+        titlePane.setStyle("-fx-background-color: #4CAF50;");
 
         Label titleLabel = new Label("Hangman Game");
-        titleLabel.setFont(new Font("Arial", 24));
+        titleLabel.setFont(new Font("Arial", 32));
+        titleLabel.setTextFill(Color.WHITE);
         titlePane.setTop(titleLabel);
         BorderPane.setAlignment(titleLabel, Pos.CENTER);
 
@@ -63,7 +65,7 @@ public class HangmanFX extends Application {
 
     private BorderPane createGamePane() {
         BorderPane gamePane = new BorderPane();
-        gamePane.setStyle("-fx-background-color: #f0f0f0;");
+        gamePane.setStyle("-fx-background-color: #90EE90;");
 
         // Word label
         wordLabel = new Label(hangmanGame.getGuessedWord());
@@ -85,7 +87,25 @@ public class HangmanFX extends Application {
         gamePane.setBottom(guessInput);
         BorderPane.setAlignment(guessInput, Pos.CENTER);
 
+        // Start Over button
+        startOverButton = new Button("Start Over");
+        startOverButton.setOnAction(e -> {
+            hangmanGame.reset();
+            updateGameUI();
+            primaryStage.setScene(createTitleScene());
+        });
+        startOverButton.setVisible(false);
+
+        VBox bottomBox = new VBox(10, guessInput, startOverButton);
+        bottomBox.setAlignment(Pos.CENTER);
+        gamePane.setBottom(bottomBox);
+
         return gamePane;
+    }
+
+    private Scene createTitleScene() {
+        BorderPane titlePane = createTitlePage();
+        return new Scene(titlePane, 400, 300);
     }
 
     private void makeGuess(String guess) {
@@ -106,6 +126,10 @@ public class HangmanFX extends Application {
     private void updateGameUI() {
         wordLabel.setText(hangmanGame.getGuessedWord());
         attemptsLabel.setText("Attempts left: " + hangmanGame.getAttemptsLeft());
+
+        if (hangmanGame.isGameOver()) {
+            startOverButton.setVisible(true);
+        }
     }
 
     private void showGameOverPopup() {
