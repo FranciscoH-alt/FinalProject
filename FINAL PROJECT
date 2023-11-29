@@ -7,7 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-public class App extends Application {
+public class HangmanFX extends Application {
     private HangmanGameFX hangmanGame;
     private Label wordLabel;
     private Label attemptsLabel;
@@ -33,7 +33,11 @@ public class App extends Application {
 
         // Switch to the game scene when the start button is clicked
         Button startButton = (Button) titlePane.lookup("#startButton");
-        startButton.setOnAction(e -> primaryStage.setScene(gameScene));
+        startButton.setOnAction(e -> {
+            hangmanGame.reset();
+            updateGameUI();
+            primaryStage.setScene(gameScene);
+        });
 
         // Start with the title scene
         primaryStage.setScene(titleScene);
@@ -75,7 +79,7 @@ public class App extends Application {
 
         // Guess input
         TextField guessInput = new TextField();
-        guessInput.setPromptText("Enter a letter");
+        guessInput.setPromptText("Enter a letter or the whole word");
         guessInput.setAlignment(Pos.CENTER);
         guessInput.setOnAction(e -> makeGuess(guessInput.getText()));
         gamePane.setBottom(guessInput);
@@ -85,14 +89,17 @@ public class App extends Application {
     }
 
     private void makeGuess(String guess) {
-        if (guess.length() == 1 && Character.isLetter(guess.charAt(0))) {
-            hangmanGame.makeGuess(guess.charAt(0));
-            updateGameUI();
-            if (hangmanGame.isGameOver()) {
-                showGameOverPopup();
-            }
-        } else {
-            showAlert("Invalid Input", "Please enter a valid single letter.");
+        if (guess.length() == 1) {
+            char letterGuess = guess.toLowerCase().charAt(0);
+            hangmanGame.makeGuess(letterGuess);
+        } else if (guess.length() > 1) {
+            hangmanGame.makeWordGuess(guess.toLowerCase());
+        }
+
+        updateGameUI();
+
+        if (hangmanGame.isGameOver()) {
+            showGameOverPopup();
         }
     }
 
@@ -114,24 +121,20 @@ public class App extends Application {
 
         alert.showAndWait();
     }
-
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
 }
 
 class HangmanGameFX {
-    private static final String[] WORDS = {"java", "hangman", "programming", "computer", "algorithm"};
+    private String[] words = {"java", "hangman", "programming", "computer", "algorithm"};
     private String secretWord;
     private StringBuilder guessedWord;
     private int maxAttempts;
     private int attemptsLeft;
 
     public HangmanGameFX() {
+        reset();
+    }
+
+    public void reset() {
         this.secretWord = selectRandomWord();
         this.maxAttempts = secretWord.length() + 2;
         this.attemptsLeft = maxAttempts;
@@ -159,6 +162,12 @@ class HangmanGameFX {
     }
 
     public void makeGuess(char guess) {
+        if (!Character.isLetter(guess)) {
+            return;
+        }
+
+        guess = Character.toLowerCase(guess);
+
         if (secretWord.indexOf(guess) == -1) {
             attemptsLeft--;
         } else {
@@ -166,8 +175,16 @@ class HangmanGameFX {
         }
     }
 
+    public void makeWordGuess(String wordGuess) {
+        if (wordGuess.equals(secretWord)) {
+            guessedWord = new StringBuilder(secretWord);
+        } else {
+            attemptsLeft--;
+        }
+    }
+
     private String selectRandomWord() {
-        return WORDS[(int) (Math.random() * WORDS.length)];
+        return words[(int) (Math.random() * words.length)];
     }
 
     private void updateGuessedWord(char guess) {
