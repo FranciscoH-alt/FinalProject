@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -30,6 +31,8 @@ public class App extends Application {
     private ObservableList<Node> children;
     private StringBuilder guessedLetters;
     private String theWord;
+
+    private boolean gameEnded = false;
 
     private void initGallows() {
         Line gallow1 = new Line(25, 25, 200, 25);
@@ -162,6 +165,13 @@ public class App extends Application {
         thing.setRight(gridPane);
         thing.setCenter(pane);
 
+        // Create a reset button
+        Button resetButton = new Button("Start New Game");
+        resetButton.setOnAction(e -> resetGame());
+
+        // Add the reset button to the gridPane
+        gridPane.add(resetButton, 1, 4);
+
         tfGuess.setOnAction(e -> playGame());
 
         Scene scene = new Scene(thing, 700, 400);
@@ -170,11 +180,40 @@ public class App extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        Application.launch(args);
+    private void resetGame() {
+        // Reset the game state
+        guessedLetters.setLength(0);
+        tfLettersGuessed.clear();
+        left = 6;
+        guessesRemaining.setText(String.valueOf(left));
+        gameEnded = false;
+
+        // Hide the body parts
+        for (Shape bodyPart : body) {
+            bodyPart.setVisible(false);
+        }
+
+        // Hide the word and blanks
+        for (Text letter : text) {
+            letter.setVisible(false);
+        }
+
+        // Reset the text fields
+        tfGuess.clear();
+
+        // Get a new word
+        theWord = word.getHiddenWord().toUpperCase();
+        initBlanks(theWord);
+        text = initText(theWord);
+        System.out.println(theWord);
     }
 
     private void playGame() {
+        if (gameEnded) {
+            // Game has already ended, don't process further guesses
+            return;
+        }
+
         String guess = tfGuess.getText();
         if (guess.length() == 0) {
             return;
@@ -211,7 +250,8 @@ public class App extends Application {
         }
 
         if (left == 0) {
-            // Game Over - Handle this case
+            System.out.println("Sorry, you lost! The word was: " + theWord);
+            gameEnded = true;
         }
 
         boolean solved = true;
@@ -223,17 +263,21 @@ public class App extends Application {
         }
 
         if (solved) {
-            // Handle Winning
+            System.out.println("Congratulations! You guessed the word: " + theWord);
+            gameEnded = true;
         }
+    }
+
+    public static void main(String[] args) {
+        Application.launch(args);
     }
 }
 
 class Dictionary {
-    // You need to implement the getHiddenWord() method based on your requirements
-    // For demonstration purposes, I'll provide a simple implementation
     public String getHiddenWord() {
         String[] words = {"hangman", "java", "programming", "computer", "developer"};
         return words[(int) (Math.random() * words.length)];
     }
 }
+
 
