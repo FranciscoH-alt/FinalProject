@@ -1,249 +1,239 @@
+import java.util.ArrayList;
+
 import javafx.application.Application;
-import javafx.geometry.Pos;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.Random;
-
 public class App extends Application {
-    private HangmanGameFX hangmanGame;
-    private Label wordLabel;
-    private Label attemptsLabel;
+    private TextField tfGuess = new TextField();
+    private TextField tfLettersGuessed = new TextField();
+    private Dictionary word = new Dictionary();
 
-    public static void main(String[] args) {
-        launch(args);
+    private Text[] text;
+    private Label guessesRemaining;
+
+    private int left;
+    private ArrayList<Shape> body;
+    private ObservableList<Node> children;
+    private StringBuilder guessedLetters;
+    private String theWord;
+
+    private void initGallows() {
+        Line gallow1 = new Line(25, 25, 200, 25);
+        gallow1.setStroke(Color.BROWN);
+        gallow1.setStrokeWidth(3);
+        children.add(gallow1);
+
+        Line gallow2 = new Line(25, 25, 25, 300);
+        gallow2.setStroke(Color.BROWN);
+        gallow2.setStrokeWidth(3);
+        children.add(gallow2);
+
+        Line gallow3 = new Line(300, 300, 25, 300);
+        gallow3.setStroke(Color.BROWN);
+        gallow3.setStrokeWidth(3);
+        children.add(gallow3);
+
+        Line rope = new Line(200, 25, 200, 75);
+        rope.setStroke(Color.BROWN);
+        rope.setStrokeWidth(3);
+        children.add(rope);
+    }
+
+    private void initBody() {
+        body = new ArrayList<>();
+
+        Ellipse head = new Ellipse(200, 112, 35, 35);
+        head.setStroke(Color.BLACK);
+        head.setFill(Color.WHITE);
+        head.setStrokeWidth(5);
+        head.setVisible(false);
+        children.add(head);
+        body.add(head);
+
+        Line tor = new Line(200, 200, 200, 150);
+        tor.setStroke(Color.GOLD);
+        tor.setStrokeWidth(5);
+        tor.setVisible(false);
+        children.add(tor);
+        body.add(tor);
+
+        Line lftArm = new Line(150, 225, 200, 175);
+        lftArm.setStroke(Color.BLACK);
+        lftArm.setStrokeWidth(5);
+        lftArm.setVisible(false);
+        children.add(lftArm);
+        body.add(lftArm);
+
+        Line rtArm = new Line(250, 225, 200, 175);
+        rtArm.setStroke(Color.BLACK);
+        rtArm.setStrokeWidth(5);
+        rtArm.setVisible(false);
+        children.add(rtArm);
+        body.add(rtArm);
+
+        Line lftLeg = new Line(200, 200, 175, 275);
+        lftLeg.setStroke(Color.BLACK);
+        lftLeg.setStrokeWidth(5);
+        lftLeg.setVisible(false);
+        children.add(lftLeg);
+        body.add(lftLeg);
+
+        Line rtLeg = new Line(200, 200, 225, 275);
+        rtLeg.setStroke(Color.BLACK);
+        rtLeg.setStrokeWidth(5);
+        rtLeg.setVisible(false);
+        children.add(rtLeg);
+        body.add(rtLeg);
+    }
+
+    private void initBlanks(String word) {
+        Line[] blanks = new Line[word.length()];
+        int xStart = 375;
+        int lineLength = 25;
+        int lineSpacing = 35;
+        for (int i = 0; i < blanks.length; i++) {
+            int xcoord = xStart + (lineSpacing * i);
+            blanks[i] = new Line(xcoord, 225, xcoord - lineLength, 225);
+            blanks[i].setStroke(Color.BLACK);
+            blanks[i].setStrokeWidth(3);
+            children.add(blanks[i]);
+        }
+    }
+
+    private Text[] initText(String word) {
+        Text[] text = new Text[word.length()];
+        int xStartw = 355;
+        int lineSpacingw = 35;
+        for (int i = 0; i < text.length; i++) {
+            int xcoordw = xStartw + (lineSpacingw * i);
+            text[i] = new Text(word.substring(i, i + 1));
+            text[i].setFont(new Font(30));
+            text[i].setX(xcoordw);
+            text[i].setY(220);
+            text[i].setVisible(false);
+            children.add(text[i]);
+        }
+        return text;
     }
 
     @Override
     public void start(Stage primaryStage) {
+        Pane pane = new Pane();
+        children = pane.getChildren();
+
+        initGallows();
+        initBody();
+
+        theWord = word.getHiddenWord().toUpperCase();
+        guessedLetters = new StringBuilder();
+
+        initBlanks(theWord);
+        System.out.println(theWord);
+
+        text = initText(theWord);
+        left = 6;
+
+        GridPane gridPane = new GridPane();
+        gridPane.setHgap(5);
+        gridPane.setVgap(5);
+        gridPane.add(new Label("Enter a letter:"), 0, 0);
+        gridPane.add(tfGuess, 1, 0);
+        gridPane.add(new Label("Letters Guessed:"), 0, 1);
+        gridPane.add(tfLettersGuessed, 1, 1);
+        gridPane.add(new Label("Guesses Remaining: "), 0, 2);
+        guessesRemaining = new Label(String.valueOf(left));
+        gridPane.add(guessesRemaining, 0, 3);
+
+        BorderPane thing = new BorderPane();
+        thing.setRight(gridPane);
+        thing.setCenter(pane);
+
+        tfGuess.setOnAction(e -> playGame());
+
+        Scene scene = new Scene(thing, 700, 400);
         primaryStage.setTitle("Hangman Game");
-
-        // Title page
-        BorderPane titlePane = createTitlePage(primaryStage);
-        Scene titleScene = new Scene(titlePane, 400, 300);
-
-        // Set up the game
-        hangmanGame = new HangmanGameFX();
-
-        // Main game scene
-        BorderPane gamePane = createGamePane(primaryStage);
-        Scene gameScene = new Scene(gamePane, 400, 300);
-
-        // Switch to the game scene when the start button is clicked
-        Button startButton = (Button) titlePane.lookup("#startButton");
-        startButton.setOnAction(e -> {
-            hangmanGame.setWordLength(getSelectedWordLength(titlePane));
-            hangmanGame.reset();
-            updateGameUI();
-            primaryStage.setScene(gameScene);
-        });
-
-        // Start with the title scene
-        primaryStage.setScene(titleScene);
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private BorderPane createTitlePage(Stage primaryStage) {
-        BorderPane titlePane = new BorderPane();
-        titlePane.setStyle("-fx-background-color: #4CAF50;");
-
-        Label titleLabel = new Label("Hangman Game");
-        titleLabel.setStyle("-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;");
-        titlePane.setTop(titleLabel);
-        BorderPane.setAlignment(titleLabel, Pos.CENTER);
-
-        VBox optionsBox = new VBox(10);
-        optionsBox.setAlignment(Pos.CENTER);
-
-        // Word length selection
-        Label lengthLabel = new Label("Select Word Length:");
-        ComboBox<Integer> lengthComboBox = new ComboBox<>();
-        lengthComboBox.getItems().addAll(3, 4, 5, 6, 7, 8, 9, 10); // Customize the lengths as needed
-        lengthComboBox.setValue(5); // Default word length
-        optionsBox.getChildren().addAll(lengthLabel, lengthComboBox);
-
-        Button startButton = new Button("Start Game");
-        startButton.setId("startButton");
-        optionsBox.getChildren().add(startButton);
-        BorderPane.setAlignment(startButton, Pos.CENTER);
-
-        titlePane.setCenter(optionsBox);
-        return titlePane;
+    public static void main(String[] args) {
+        Application.launch(args);
     }
 
-    private int getSelectedWordLength(BorderPane titlePane) {
-        ComboBox<Integer> lengthComboBox = (ComboBox<Integer>) titlePane.lookup(".comboBox");
-        return lengthComboBox.getValue();
-    }
-
-    private BorderPane createGamePane(Stage primaryStage) {
-        BorderPane gamePane = new BorderPane();
-        gamePane.setStyle("-fx-background-color: #90EE90;");
-
-        // Word label
-        wordLabel = new Label(hangmanGame.getGuessedWord());
-        wordLabel.setStyle("-fx-font-weight: bold;");
-        wordLabel.setWrapText(true);
-        gamePane.setTop(wordLabel);
-        BorderPane.setAlignment(wordLabel, Pos.CENTER);
-
-        // Attempts label
-        attemptsLabel = new Label("Attempts left: " + hangmanGame.getAttemptsLeft());
-        attemptsLabel.setStyle("-fx-font-weight: bold;");
-        gamePane.setCenter(attemptsLabel);
-        BorderPane.setAlignment(attemptsLabel, Pos.CENTER);
-
-        // Guess input
-        TextField guessInput = new TextField();
-        guessInput.setPromptText("Enter a letter");
-        guessInput.setAlignment(Pos.CENTER);
-        guessInput.setOnAction(e -> makeGuess(guessInput.getText()));
-        gamePane.setBottom(guessInput);
-        BorderPane.setAlignment(guessInput, Pos.CENTER);
-
-        // Reset button
-        Button resetButton = new Button("Reset");
-        resetButton.setOnAction(e -> {
-            hangmanGame.reset();
-            updateGameUI();
-        });
-        VBox buttonBox = new VBox(10, guessInput, resetButton);
-        buttonBox.setAlignment(Pos.CENTER);
-        gamePane.setBottom(buttonBox);
-
-        return gamePane;
-    }
-
-    private void makeGuess(String guess) {
-        if (guess.length() == 1) {
-            char letterGuess = guess.toLowerCase().charAt(0);
-            hangmanGame.makeGuess(letterGuess);
-        }
-
-        updateGameUI();
-
-        if (hangmanGame.isGameOver()) {
-            Stage primaryStage;
-            showGameOverPopup(primaryStage);
-        }
-    }
-
-    private void updateGameUI() {
-        wordLabel.setText(hangmanGame.getGuessedWord());
-        attemptsLabel.setText("Attempts left: " + hangmanGame.getAttemptsLeft());
-    }
-
-    private void showGameOverPopup(Stage primaryStage) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Over");
-        alert.setHeaderText(null);
-
-        if (hangmanGame.isGameWon()) {
-            alert.setContentText("Congratulations! You guessed the word: " + hangmanGame.getSecretWord());
-        } else {
-            alert.setContentText("Sorry! The correct word was: " + hangmanGame.getSecretWord());
-        }
-
-        alert.setOnHidden(e -> {
-            // Reset the game and update UI after closing the alert
-            hangmanGame.reset();
-            updateGameUI();
-            primaryStage.setScene(createTitleScene(primaryStage));
-        });
-
-        alert.show();
-    }
-
-    private Scene createTitleScene(Stage primaryStage) {
-        BorderPane titlePane = createTitlePage(primaryStage);
-        return new Scene(titlePane, 400, 300);
-    }
-}
-
-class HangmanGameFX {
-    private String[] words = {"java", "hangman", "programming", "computer", "algorithm", "openai", "gpt", "interface", "application", "development", "keyboard", "language", "cryptography", "encryption"};
-    private String secretWord;
-    private StringBuilder guessedWord;
-    private int maxAttempts;
-    private int attemptsLeft;
-    private int wordLength;
-
-    public HangmanGameFX() {
-        reset();
-    }
-
-    public void setWordLength(int length) {
-        this.wordLength = length;
-    }
-
-    public void reset() {
-        this.secretWord = selectRandomWord();
-        this.maxAttempts = secretWord.length() + 2;
-        this.attemptsLeft = maxAttempts;
-        this.guessedWord = new StringBuilder("_".repeat(secretWord.length()));
-    }
-
-    public boolean isGameOver() {
-        return attemptsLeft <= 0 || guessedWord.toString().equals(secretWord);
-    }
-
-    public boolean isGameWon() {
-        return guessedWord.toString().equals(secretWord);
-    }
-
-    public String getGuessedWord() {
-        return guessedWord.toString();
-    }
-
-    public int getAttemptsLeft() {
-        return attemptsLeft;
-    }
-
-    public String getSecretWord() {
-        return secretWord;
-    }
-
-    public void makeGuess(char guess) {
-        if (!Character.isLetter(guess)) {
+    private void playGame() {
+        String guess = tfGuess.getText();
+        if (guess.length() == 0) {
             return;
         }
-
-        guess = Character.toLowerCase(guess);
-
-        if (secretWord.indexOf(guess) == -1) {
-            attemptsLeft--;
-        } else {
-            updateGuessedWord(guess);
+        if (guess.length() > 1) {
+            guess = guess.substring(0, 1);
         }
-    }
+        guess = guess.toUpperCase();
+        tfGuess.setText("");
 
-    /**
-     * @param guess
-     */
-    private void updateGuessedWord(char guess) {
-    }
-
-    private String selectRandomWord() {
-        Random random = new Random();
-        String selectedWord = "";
-        do {
-                selectedWord = words[random.nextInt(words.length)];
-        } while (selectedWord.length() != wordLength);
-        return selectedWord;
-    }
-
-    /**
-     * @param guess
-     */
-    private void updateGuessedWord(char guess) {
-        for (int i = 0; i < secretWord.length(); i++) {
-            if (secretWord.charAt(i) == guess) {
-                guessedWord.setCharAt(i, guess);
+        if (guessedLetters.length() > 0) {
+            if (guessedLetters.indexOf(guess) > -1) {
+                return;
+            } else {
+                guessedLetters.append(guess);
             }
+        } else {
+            guessedLetters.append(guess);
+        }
+        tfLettersGuessed.setText(guessedLetters.toString());
+
+        boolean good = false;
+        for (int i = 0; i < theWord.length(); i++) {
+            if (guess.equalsIgnoreCase(theWord.substring(i, i + 1))) {
+                text[i].setVisible(true);
+                good = true;
+            }
+        }
+
+        if (!good) {
+            body.get(6 - left).setVisible(true);
+            left--;
+            guessesRemaining.setText(String.valueOf(left));
+        }
+
+        if (left == 0) {
+            // Game Over - Handle this case
+        }
+
+        boolean solved = true;
+        for (int i = 0; i < text.length; i++) {
+            if (!text[i].isVisible()) {
+                solved = false;
+                break;
+            }
+        }
+
+        if (solved) {
+            // Handle Winning
         }
     }
 }
 
+class Dictionary {
+    // You need to implement the getHiddenWord() method based on your requirements
+    // For demonstration purposes, I'll provide a simple implementation
+    public String getHiddenWord() {
+        String[] words = {"hangman", "java", "programming", "computer", "developer"};
+        return words[(int) (Math.random() * words.length)];
+    }
+}
 
