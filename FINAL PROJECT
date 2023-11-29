@@ -1,0 +1,180 @@
+import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
+public class App extends Application {
+    private HangmanGameFX hangmanGame;
+    private Label wordLabel;
+    private Label attemptsLabel;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Hangman Game");
+
+        // Title page
+        BorderPane titlePane = createTitlePage();
+        Scene titleScene = new Scene(titlePane, 400, 300);
+
+        // Set up the game
+        hangmanGame = new HangmanGameFX();
+
+        // Main game scene
+        BorderPane gamePane = createGamePane();
+        Scene gameScene = new Scene(gamePane, 400, 300);
+
+        // Switch to the game scene when the start button is clicked
+        Button startButton = (Button) titlePane.lookup("#startButton");
+        startButton.setOnAction(e -> primaryStage.setScene(gameScene));
+
+        // Start with the title scene
+        primaryStage.setScene(titleScene);
+        primaryStage.show();
+    }
+
+    private BorderPane createTitlePage() {
+        BorderPane titlePane = new BorderPane();
+        titlePane.setStyle("-fx-background-color: #c0c0c0;");
+
+        Label titleLabel = new Label("Hangman Game");
+        titleLabel.setFont(new Font("Arial", 24));
+        titlePane.setTop(titleLabel);
+        BorderPane.setAlignment(titleLabel, Pos.CENTER);
+
+        Button startButton = new Button("Start Game");
+        startButton.setId("startButton");
+        titlePane.setCenter(startButton);
+        BorderPane.setAlignment(startButton, Pos.CENTER);
+
+        return titlePane;
+    }
+
+    private BorderPane createGamePane() {
+        BorderPane gamePane = new BorderPane();
+        gamePane.setStyle("-fx-background-color: #f0f0f0;");
+
+        // Word label
+        wordLabel = new Label(hangmanGame.getGuessedWord());
+        wordLabel.setFont(new Font("Arial", 20));
+        gamePane.setTop(wordLabel);
+        BorderPane.setAlignment(wordLabel, Pos.CENTER);
+
+        // Attempts label
+        attemptsLabel = new Label("Attempts left: " + hangmanGame.getAttemptsLeft());
+        attemptsLabel.setFont(new Font("Arial", 16));
+        gamePane.setCenter(attemptsLabel);
+        BorderPane.setAlignment(attemptsLabel, Pos.CENTER);
+
+        // Guess input
+        TextField guessInput = new TextField();
+        guessInput.setPromptText("Enter a letter");
+        guessInput.setAlignment(Pos.CENTER);
+        guessInput.setOnAction(e -> makeGuess(guessInput.getText()));
+        gamePane.setBottom(guessInput);
+        BorderPane.setAlignment(guessInput, Pos.CENTER);
+
+        return gamePane;
+    }
+
+    private void makeGuess(String guess) {
+        if (guess.length() == 1 && Character.isLetter(guess.charAt(0))) {
+            hangmanGame.makeGuess(guess.charAt(0));
+            updateGameUI();
+            if (hangmanGame.isGameOver()) {
+                showGameOverPopup();
+            }
+        } else {
+            showAlert("Invalid Input", "Please enter a valid single letter.");
+        }
+    }
+
+    private void updateGameUI() {
+        wordLabel.setText(hangmanGame.getGuessedWord());
+        attemptsLabel.setText("Attempts left: " + hangmanGame.getAttemptsLeft());
+    }
+
+    private void showGameOverPopup() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over");
+        alert.setHeaderText(null);
+
+        if (hangmanGame.isGameWon()) {
+            alert.setContentText("Congratulations! You guessed the word: " + hangmanGame.getSecretWord());
+        } else {
+            alert.setContentText("Sorry! The correct word was: " + hangmanGame.getSecretWord());
+        }
+
+        alert.showAndWait();
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+}
+
+class HangmanGameFX {
+    private static final String[] WORDS = {"java", "hangman", "programming", "computer", "algorithm"};
+    private String secretWord;
+    private StringBuilder guessedWord;
+    private int maxAttempts;
+    private int attemptsLeft;
+
+    public HangmanGameFX() {
+        this.secretWord = selectRandomWord();
+        this.maxAttempts = secretWord.length() + 2;
+        this.attemptsLeft = maxAttempts;
+        this.guessedWord = new StringBuilder("_".repeat(secretWord.length()));
+    }
+
+    public boolean isGameOver() {
+        return attemptsLeft <= 0 || guessedWord.toString().equals(secretWord);
+    }
+
+    public boolean isGameWon() {
+        return guessedWord.toString().equals(secretWord);
+    }
+
+    public String getGuessedWord() {
+        return guessedWord.toString();
+    }
+
+    public int getAttemptsLeft() {
+        return attemptsLeft;
+    }
+
+    public String getSecretWord() {
+        return secretWord;
+    }
+
+    public void makeGuess(char guess) {
+        if (secretWord.indexOf(guess) == -1) {
+            attemptsLeft--;
+        } else {
+            updateGuessedWord(guess);
+        }
+    }
+
+    private String selectRandomWord() {
+        return WORDS[(int) (Math.random() * WORDS.length)];
+    }
+
+    private void updateGuessedWord(char guess) {
+        for (int i = 0; i < secretWord.length(); i++) {
+            if (secretWord.charAt(i) == guess) {
+                guessedWord.setCharAt(i, guess);
+            }
+        }
+    }
+}
