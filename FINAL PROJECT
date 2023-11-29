@@ -25,6 +25,7 @@ public class App extends Application {
 
     private Text[] text;
     private Label guessesRemaining;
+    private Label resultLabel;
 
     private int left;
     private ArrayList<Shape> body;
@@ -161,16 +162,16 @@ public class App extends Application {
         guessesRemaining = new Label(String.valueOf(left));
         gridPane.add(guessesRemaining, 0, 3);
 
+        resultLabel = new Label("");
+        gridPane.add(resultLabel, 1, 4);
+
         BorderPane thing = new BorderPane();
         thing.setRight(gridPane);
         thing.setCenter(pane);
 
-        // Create a reset button
         Button resetButton = new Button("Start New Game");
         resetButton.setOnAction(e -> resetGame());
-
-        // Add the reset button to the gridPane
-        gridPane.add(resetButton, 1, 4);
+        gridPane.add(resetButton, 1, 5);
 
         tfGuess.setOnAction(e -> playGame());
 
@@ -181,36 +182,26 @@ public class App extends Application {
     }
 
     private void resetGame() {
-        // Reset the game state
-        guessedLetters.setLength(0);
-        tfLettersGuessed.clear();
-        left = 6;
-        guessesRemaining.setText(String.valueOf(left));
-        gameEnded = false;
-
-        // Hide the body parts
-        for (Shape bodyPart : body) {
-            bodyPart.setVisible(false);
-        }
-
-        // Hide the word and blanks
-        for (Text letter : text) {
-            letter.setVisible(false);
-        }
-
-        // Reset the text fields
-        tfGuess.clear();
-
-        // Get a new word
+        // Reset all game variables
         theWord = word.getHiddenWord().toUpperCase();
+        guessedLetters.setLength(0);
+        tfLettersGuessed.setText("");
         initBlanks(theWord);
         text = initText(theWord);
-        System.out.println(theWord);
+        left = 6;
+        guessesRemaining.setText(String.valueOf(left));
+        resultLabel.setText("");
+        gameEnded = false;
+
+        // Make all body parts invisible again
+        for (Shape part : body) {
+            part.setVisible(false);
+        }
     }
 
     private void playGame() {
         if (gameEnded) {
-            // Game has already ended, don't process further guesses
+            System.out.println("The game has ended. Please start a new game.");
             return;
         }
 
@@ -250,7 +241,7 @@ public class App extends Application {
         }
 
         if (left == 0) {
-            System.out.println("Sorry, you lost! The word was: " + theWord);
+            resultLabel.setText("Sorry, you lost! The word was: " + theWord);
             gameEnded = true;
         }
 
@@ -263,7 +254,7 @@ public class App extends Application {
         }
 
         if (solved) {
-            System.out.println("Congratulations! You guessed the word: " + theWord);
+            resultLabel.setText("Congratulations! You guessed the word: " + theWord);
             gameEnded = true;
         }
     }
@@ -279,5 +270,3 @@ class Dictionary {
         return words[(int) (Math.random() * words.length)];
     }
 }
-
-
