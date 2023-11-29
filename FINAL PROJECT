@@ -185,7 +185,7 @@ public class App extends Application {
         // Reset all game variables
         theWord = word.getHiddenWord().toUpperCase();
         guessedLetters.setLength(0);
-        tfLettersGuessed.setText("");
+        tfLettersGuessed.clear();
         initBlanks(theWord);
         text = initText(theWord);
         left = 6;
@@ -213,7 +213,7 @@ public class App extends Application {
             guess = guess.substring(0, 1);
         }
         guess = guess.toUpperCase();
-        tfGuess.setText("");
+        tfGuess.clear();
 
         if (guessedLetters.length() > 0) {
             if (guessedLetters.indexOf(guess) > -1) {
