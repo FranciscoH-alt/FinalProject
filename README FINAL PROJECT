@@ -1,0 +1,11 @@
+Clone the repository to your local machine:
+Open the project in your favorite Java IDE.
+Run the App class, which contains the main method.
+The Hangman game window should appear. Enter a letter in the provided text field and press Enter to make a guess.
+The game will display the progress, the letters guessed, and the remaining guesses. If the game ends, a message will indicate whether you won or lost.
+
+How to Play
+Guess letters by entering them in the text field and pressing Enter.
+The game allows uppercase and lowercase letters.
+The "Start New Game" button resets the game for a new round.
+
