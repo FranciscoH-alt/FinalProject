@@ -1,0 +1,99 @@
++------------------+
+|       App        |
++------------------+
+| - tfGuess: TextField        |
+| - tfLettersGuessed: TextField   |
+| - text: Text[]         |
+| - left: int           |
+| - body: ArrayList<Shape>           |
+| - children: ObservableList<Node>       |
+| - guessedLetters: StringBuilder   |
+| - theWord: String        |
+| - gameEnded: boolean      |
+| - guessesRemaining: Label   |
+| - resultLabel: Label      |
++------------------+
+| + start(primaryStage: Stage): void |
+| + resetGame(): void       |
+| + playGame(): void        |
+| + main(args: String[]): void |
++------------------+
+
++------------------+
+|   Dictionary     |
++------------------+
+| +getHiddenWord(): String |
++------------------+
+
++------------------+
+|      Line        |
++------------------+
+| - startX: double          |
+| - startY: double          |
+| - endX: double            |
+| - endY: double            |
++------------------+
+| + setStartX(startX: double): void |
+| + setStartY(startY: double): void |
+| + setEndX(endX: double): void   |
+| + setEndY(endY: double): void   |
++------------------+
+
++------------------+
+|      Text        |
++------------------+
+| - x: double              |
+| - y: double              |
+| - content: String        |
+| - font: Font             |
++------------------+
+| + setFont(font: Font): void   |
+| + setX(x: double): void       |
+| + setY(y: double): void       |
+| + setText(text: String): void |
+| + setVisible(visible: boolean): void |
++------------------+
+
++------------------+
+|     Ellipse      |
++------------------+
+| - centerX: double         |
+| - centerY: double         |
+| - radiusX: double         |
+| - radiusY: double         |
+| - fill: Paint             |
+| - stroke: Paint           |
+| - strokeWidth: double     |
++------------------+
+| + setCenterX(centerX: double): void |
+| + setCenterY(centerY: double): void |
+| + setRadiusX(radiusX: double): void |
+| + setRadiusY(radiusY: double): void |
+| + setFill(fill: Paint): void |
+| + setStroke(stroke: Paint): void |
+| + setStrokeWidth(strokeWidth: double): void |
++------------------+
+
++------------------+
+|    GridPane      |
++------------------+
+| - hgap: double           |
+| - vgap: double           |
++------------------+
+| + add(child: Node, columnIndex: int, rowIndex: int): void |
++------------------+
+
++------------------+
+|   BorderPane     |
++------------------+
+| + setRight(node: Node): void |
+| + setCenter(node: Node): void|
++------------------+
+
++------------------+
+|      Button      |
++------------------+
+| - text: String           |
++------------------+
+| + setOnAction(handler: EventHandler<ActionEvent>): void |
++------------------+
